@@ -362,6 +362,7 @@ function PANEL:SetFontInternal( font )
 
 	self:InsertFontChange( font )
 	self.fontInternal = font
+	self.cur_font = font
 
 end
 
@@ -398,19 +399,23 @@ function PANEL:AppendText( text )
 	
 	local etext = string.Explode("\n", text) --Split newlines in sections
 
-	if self.fontInternal then
-		surface.SetFont( self.fontInternal )
-	else
-		surface.SetFont( self.font )
-	end
+	surface.SetFont( self.cur_font )
 	for l,line in pairs(etext) do --Loop lines
-		--print("line",line)
 		local parts = string.Explode(" ", line) --Split spaces, perhaps find another way to split seperators
+		local x = 1
+
 		for n,part in pairs(parts) do
+			x = x + utf8.len(part)
+
+			local space,_ = surface.GetTextSize( " " )
 			local wide, tall = surface.GetTextSize( part )
 			if part != "" and part != " " then --I dont know why this is possible
 				self:AppendItem( {"text", {text = part, w = wide, h = tall}} )
-				self:AppendItem( {"blank", {w = 4, h = tall}} )
+
+				if(utf8.GetChar(line, x) == " ") then --Not all strings ends with space
+					x = x + 1
+					self:AppendItem( {"blank", {w = space, h = tall}} ) --Add dynamic changing by font space
+				end
 			end
 		end
 		if l != #etext then --Begin new line, except if it's the last line
@@ -457,6 +462,7 @@ function PANEL:InsertFontChange( font )
   end
 	table.insert(self.lines[#self.lines], {"font", font})
 	surface.SetFont( font ) --Fixme: Needed to calc following text widths, causes side effects!
+	self.cur_font = font
 end
 
 function PANEL:Paint( w, h )
