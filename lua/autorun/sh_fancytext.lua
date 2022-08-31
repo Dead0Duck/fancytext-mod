@@ -9,6 +9,12 @@ end
 	print("--------------------------CL_FANCYTEXT")
 
 fText = {}
+local DebugMode = false
+local dprint = function(txt)
+	if(DebugMode) then
+		print('[DFancyText] '..txt)
+	end
+end
 
 function fText.demo()
 	fText.frame = vgui.Create("DFrame")
@@ -105,9 +111,9 @@ function PANEL:Init()
 		local wide, tall = surface.GetTextSize( " " )
 		self.sepwide = wide
 		self.chartall = tall
-		print("I PUT WIDE TO", self.sepwide, self)
+		dprint("I PUT WIDE TO", self.sepwide, self)
 	end)
-	print("INIT",self.chartall)
+	dprint("INIT",self.chartall)
 	self.lines = {}
 	self.maxlines = false
 	self.curwide = 0
@@ -364,12 +370,12 @@ function PANEL:AppendItem( item )
     return self:AppendText( item )
   end
 	if self.maxlines and #self.lines > self.maxlines then
-		--print("REMOVING")
+		--dprint("REMOVING")
 		table.remove( self.lines, 1 )
 	end
 	local wide = item[2].w
-	--print("sepwide",self.sepwide)
-	--print("word",part,self.curwide, self.sepwide, wide, "<", self:GetWide(),self)
+	--dprint("sepwide",self.sepwide)
+	--dprint("word",part,self.curwide, self.sepwide, wide, "<", self:GetWide(),self)
 	if self.curwide + wide < self:GetWide() - self.margin*2 then
 		--If above passes, theres enough room to add another word
 		self.curwide = self.curwide + wide
@@ -377,7 +383,7 @@ function PANEL:AppendItem( item )
     self.maxwide = math.max(self.curwide, self.maxwide)
 	else
 		--Otherwise add another line before inserting part
-		--print("newline", part)
+		--dprint("newline", part)
     table.insert(self.lines, {})
     self.maxwide = math.max(self.curwide, self.maxwide)
 		self.curwide = wide
@@ -418,7 +424,7 @@ function PANEL:AppendText( text )
 	
 	self:_PerformLayout()
 	
-	print( text )
+	dprint( text )
 	
 end
 
@@ -430,12 +436,12 @@ function PANEL:AppendImage( info )
 end
 
 function PANEL:AppendFunc( fn )
-	print("fn", fn)
+	dprint("fn", fn)
 	local info = fn(self.chartall)
 	info.panel:SetParent( self.pnlCanvas )
 	self.pnlCanvas:Add( info.panel )
 	self:AppendItem( {"panel", info} )
-	print("fn", info)
+	dprint("fn", info)
 end
 
 function PANEL:InsertColorChange( r, g, b, a )
